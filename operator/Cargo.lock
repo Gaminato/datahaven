@@ -1610,6 +1610,7 @@ dependencies = [
  "pallet-mmr",
  "pallet-multisig",
  "pallet-preimage",
+ "pallet-scheduler",
  "pallet-session",
  "pallet-sudo",
  "pallet-timestamp",
@@ -5970,6 +5971,23 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
+]
+
+[[package]]
+name = "pallet-scheduler"
+version = "39.0.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2409#43d7b1e329f50a37cbd67e15aae70c60556cbb59"
+dependencies = [
+ "docify",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
+ "sp-weights",
 ]
 
 [[package]]

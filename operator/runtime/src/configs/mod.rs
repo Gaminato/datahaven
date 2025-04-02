@@ -23,32 +23,26 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
-use crate::EvmChainId;
-use crate::OriginCaller;
-use crate::Timestamp;
-use crate::STORAGE_BYTE_FEE;
-use crate::SUPPLY_FACTOR;
-use crate::UNIT;
-use crate::{Historical, SessionKeys, ValidatorSet};
-
 // Local module imports
 use super::{
-    deposit, AccountId, Babe, Balance, Balances, BeefyMmrLeaf, Block, BlockNumber, Hash, Nonce,
-    PalletInfo, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
-    RuntimeOrigin, RuntimeTask, Session, System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
+    deposit, AccountId, Babe, Balance, Balances, BeefyMmrLeaf, Block, BlockNumber, EvmChainId,
+    Hash, Historical, Nonce, OriginCaller, PalletInfo, Preimage, Runtime, RuntimeCall,
+    RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session,
+    SessionKeys, System, Timestamp, ValidatorSet, EXISTENTIAL_DEPOSIT, SLOT_DURATION,
+    STORAGE_BYTE_FEE, SUPPLY_FACTOR, UNIT, VERSION,
 };
 // Substrate and Polkadot dependencies
 use codec::{Decode, Encode};
-use datahaven_runtime_common::gas::WEIGHT_PER_GAS;
-use datahaven_runtime_common::time::{EpochDurationInBlocks, MILLISECS_PER_BLOCK, MINUTES};
-use frame_support::traits::fungible::HoldConsideration;
-use frame_support::traits::LinearStoragePrice;
+use datahaven_runtime_common::{
+    gas::WEIGHT_PER_GAS,
+    time::{EpochDurationInBlocks, MILLISECS_PER_BLOCK, MINUTES},
+};
 use frame_support::{
     derive_impl, parameter_types,
     traits::{
-        fungible::{Balanced, Credit, Inspect},
-        ConstU128, ConstU32, ConstU64, ConstU8, FindAuthor, KeyOwnerProofSystem, OnUnbalanced,
-        VariantCountOf,
+        fungible::{Balanced, Credit, HoldConsideration, Inspect},
+        ConstU128, ConstU32, ConstU64, ConstU8, EqualPrivilegeOnly, FindAuthor,
+        KeyOwnerProofSystem, LinearStoragePrice, OnUnbalanced, VariantCountOf,
     },
     weights::{
         constants::{RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
@@ -276,6 +270,24 @@ impl pallet_multisig::Config for Runtime {
     type DepositBase = DepositBase;
     type DepositFactor = DepositFactor;
     type MaxSignatories = MaxSignatories;
+    type WeightInfo = ();
+}
+
+parameter_types! {
+    pub MaximumSchedulerWeight: Weight = NORMAL_DISPATCH_RATIO * RuntimeBlockWeights::get().max_block;
+    pub const NoPreimagePostponement: Option<u32> = Some(10);
+}
+
+impl pallet_scheduler::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
+    type PalletsOrigin = OriginCaller;
+    type RuntimeCall = RuntimeCall;
+    type MaximumWeight = MaximumSchedulerWeight;
+    type ScheduleOrigin = EnsureRoot<AccountId>;
+    type MaxScheduledPerBlock = ConstU32<50>;
+    type OriginPrivilegeCmp = EqualPrivilegeOnly;
+    type Preimages = Preimage;
     type WeightInfo = ();
 }
 

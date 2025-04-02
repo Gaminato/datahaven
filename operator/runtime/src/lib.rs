@@ -258,6 +258,9 @@ mod runtime {
     #[runtime::pallet_index(20)]
     pub type Utility = pallet_utility;
 
+    #[runtime::pallet_index(21)]
+    pub type Scheduler = pallet_scheduler;
+
     #[runtime::pallet_index(22)]
     pub type Preimage = pallet_preimage;
 
