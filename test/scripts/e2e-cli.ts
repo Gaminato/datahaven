@@ -1,15 +1,16 @@
 import { $ } from "bun";
-import invariant from "tiny-invariant";
 import chalk from "chalk";
+import invariant from "tiny-invariant";
 import { logger, printDivider, printHeader } from "utils";
-import sendTxn from "./send-txn";
-import { launchKurtosis } from "./launch-kurtosis";
 import { deployContracts } from "./deploy-contracts";
+import { launchKurtosis } from "./launch-kurtosis";
+import sendTxn from "./send-txn";
 
 interface ScriptOptions {
   verified: boolean;
   launchKurtosis?: boolean;
   deployContracts?: boolean;
+  blockscout?: boolean;
   help?: boolean;
 }
 
@@ -21,6 +22,7 @@ async function main() {
     verified: args.includes("--verified"),
     launchKurtosis: parseFlag(args, "launchKurtosis"),
     deployContracts: parseFlag(args, "deploy-contracts"),
+    blockscout: parseFlag(args, "blockscout"),
     help: args.includes("--help") || args.includes("-h")
   };
 
@@ -40,7 +42,8 @@ async function main() {
 
   // Clean up and launch Kurtosis enclave
   const { services } = await launchKurtosis({
-    launchKurtosis: options.launchKurtosis
+    launchKurtosis: options.launchKurtosis,
+    blockscout: options.blockscout
   });
 
   // Send test transaction
@@ -57,14 +60,22 @@ async function main() {
   // Display service information in a clean table
   printHeader("Service Endpoints");
 
-  console.table(
-    services
-      .filter((s) => ["reth-1-rpc", "reth-2-rpc", "blockscout-backend", "dora"].includes(s.service))
-      .concat([
-        { service: "blockscout", port: "3000", url: "http://127.0.0.1:3000" },
-        { service: "kurtosis-web", port: "9711", url: "http://127.0.0.1:9711" }
-      ])
-  );
+  // Filter services to display based on blockscout option
+  const servicesToDisplay = services
+    .filter((s) => ["reth-1-rpc", "reth-2-rpc", "dora"].includes(s.service))
+    .concat([{ service: "kurtosis-web", port: "9711", url: "http://127.0.0.1:9711" }]);
+
+  // Conditionally add blockscout services
+  if (options.blockscout !== false) {
+    const blockscoutBackend = services.find((s) => s.service === "blockscout-backend");
+    if (blockscoutBackend) {
+      servicesToDisplay.push(blockscoutBackend);
+      // Only add frontend if backend exists
+      servicesToDisplay.push({ service: "blockscout", port: "3000", url: "http://127.0.0.1:3000" });
+    }
+  }
+
+  console.table(servicesToDisplay);
 
   printDivider();
 
@@ -77,7 +88,16 @@ async function main() {
   printDivider();
 
   // Deploy contracts using the extracted function
-  const blockscoutBackendUrl = services.find((s) => s.service === "blockscout-backend")?.url;
+  let blockscoutBackendUrl: string | undefined = undefined;
+
+  if (options.blockscout !== false) {
+    blockscoutBackendUrl = services.find((s) => s.service === "blockscout-backend")?.url;
+  } else if (options.verified) {
+    logger.warn(
+      "⚠️ Contract verification (--verified) requested, but Blockscout is disabled (--no-blockscout). Verification will be skipped."
+    );
+  }
+
   await deployContracts({
     rpcUrl: networkRpcUrl,
     verified: options.verified,
@@ -148,6 +168,7 @@ function getOptionsString(options: ScriptOptions): string {
     optionStrings.push(`launchKurtosis=${options.launchKurtosis}`);
   if (options.deployContracts !== undefined)
     optionStrings.push(`deployContracts=${options.deployContracts}`);
+  if (options.blockscout !== undefined) optionStrings.push(`blockscout=${options.blockscout}`);
   return optionStrings.length ? optionStrings.join(", ") : "no options";
 }
 
@@ -163,6 +184,8 @@ ${chalk.green("--launchKurtosis")}          Clean and launch Kurtosis enclave if
 ${chalk.green("--no-launchKurtosis")}       Keep existing Kurtosis enclave if already running
 ${chalk.green("--deploy-contracts")}        Deploy smart contracts after Kurtosis starts
 ${chalk.green("--no-deploy-contracts")}     Skip smart contract deployment
+${chalk.green("--blockscout")}              Launch Kurtosis with Blockscout services (uses minimal-with-bs.yaml)
+${chalk.green("--no-blockscout")}           Launch Kurtosis without Blockscout services (uses minimal.yaml)
 ${chalk.green("--help, -h")}                Show this help menu
 
 ${chalk.yellow("Examples:")}
