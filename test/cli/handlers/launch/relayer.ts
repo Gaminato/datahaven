@@ -175,12 +175,12 @@ export const launchRelayers = async (options: LaunchOptions, launchedNetwork: La
     const json = await file.json();
 
     const ethWsPort = await getPortFromKurtosis(
-      "el-1-reth-lighthouse",
+      "el-1-reth-lodestar",
       "ws",
       options.kurtosisEnclaveName
     );
     const ethHttpPort = await getPortFromKurtosis(
-      "cl-1-lighthouse-reth",
+      "cl-1-lodestar-reth",
       "http",
       options.kurtosisEnclaveName
     );
@@ -394,8 +394,8 @@ export const initEthClientPallet = async (
   datastorePath: string
 ) => {
   logger.debug("Initialising eth client pallet");
-  // Poll the beacon chain until it's ready every 10 seconds for 5 minutes
-  await waitBeaconChainReady(launchedNetwork, 10000, 300000);
+  // Poll the beacon chain until it's ready every 10 seconds for 10 minutes
+  await waitBeaconChainReady(launchedNetwork, 10000, 600000);
 
   const beaconConfigHostPath = path.resolve(RELAYER_CONFIG_PATHS.BEACON);
   const beaconConfigContainerPath = `/app/${RELAYER_CONFIG_PATHS.BEACON}`;
