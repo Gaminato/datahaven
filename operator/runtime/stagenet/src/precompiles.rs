@@ -17,6 +17,7 @@
 use pallet_evm_precompile_batch::BatchPrecompile;
 use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
+use pallet_evm_precompile_call_permit::CallPermitPrecompile;
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
@@ -53,6 +54,11 @@ type DataHavenPrecompilesAt<R> = (
             // Batch is the only precompile allowed to call Batch.
             CallableByPrecompile<OnlyFrom<AddressU64<2056>>>,
         ),
+    >,
+    PrecompileAt<
+        AddressU64<2058>,
+        CallPermitPrecompile<R>,
+        (SubcallWithMaxNesting<0>, CallableByContract),
     >,
     PrecompileAt<
         AddressU64<2069>,
