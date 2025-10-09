@@ -26,6 +26,7 @@ use pallet_evm_precompile_conviction_voting::ConvictionVotingPrecompile;
 use pallet_evm_precompile_file_system::FileSystemPrecompile;
 use pallet_evm_precompile_identity::IdentityPrecompile;
 use pallet_evm_precompile_modexp::Modexp;
+use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_proxy::{OnlyIsProxyAndProxy, ProxyPrecompile};
 use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
@@ -111,6 +112,11 @@ type DataHavenPrecompilesAt<R> = (
     PrecompileAt<
         AddressU64<2066>,
         ConvictionVotingPrecompile<R>,
+        (CallableByContract, CallableByPrecompile),
+    >,
+    PrecompileAt<
+        AddressU64<2067>,
+        PreimagePrecompile<R>,
         (CallableByContract, CallableByPrecompile),
     >,
     PrecompileAt<

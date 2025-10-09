@@ -745,6 +745,7 @@ fn is_governance_precompile(precompile_name: &PrecompileName) -> bool {
         PrecompileName::ConvictionVotingPrecompile
             | PrecompileName::TechnicalCommitteeInstance
             | PrecompileName::TreasuryCouncilInstance
+            | PrecompileName::PreimagePrecompile
     )
 }
 
