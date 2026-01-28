@@ -16,7 +16,7 @@ Built on the [polkadot-sdk-solochain-template](https://github.com/paritytech/pol
 
 ```
 operator/
-├── node/                          # Node implementation
+├── node/                         # Node implementation
 │   ├── src/
 │   │   ├── chain_spec.rs         # Chain specification & genesis config
 │   │   ├── cli.rs                # CLI interface
