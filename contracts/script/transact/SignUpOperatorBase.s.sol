@@ -110,6 +110,7 @@ abstract contract SignUpOperatorBase is Script, ELScriptStorage, DHScriptStorage
 
         // Register the operator as an operator.
         // We don't set a delegation approver, so that there is no need to sign any messages.
+        if (!delegation.isOperator(_operator)) {
         address initDelegationApprover = address(0);
         uint32 allocationDelay = 0;
         string memory metadataURI = "";
